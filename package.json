@@ -1,0 +1,17 @@
+{
+  "name": "yulu-final",
+  "version": "1.0.0",
+  "description": "Yulu projetct",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "zeeshan",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "*",
+    "express": "*",
+    "fs": "*"
+  }
+}

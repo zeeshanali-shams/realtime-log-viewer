@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+		Real-Time Log Viewer
+	</title>
+	<link rel="icon" href="yulu2.png" type="image/x-icon"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+</head>
+<body>
+	<div style="width: 100%">
+ 		<div style="position: fixed; border-bottom:5px solid #555; margin-top: 20px; background-color: white; width: 96%; padding: 20px;">
+	 		<img src="yulu1.png" width="70px">
+	 		<span align="center">Real-Time Log Viewer</span>
+		 	<form id="enter" style="float: right;">
+		 		<input type="text" id="file" placeholder="Enter file name">
+		 		<input type="image" id="submit" src="reload.png" width="30px">
+		 	</form>
+ 		</div>
+
+	 	<div id="serv" style="font-family: monospace; background-color: #ccc; padding: 10px;" >
+	 	</div>
+	 </div>
+
+ 	<script>
+ 		$(function() {
+ 			var $serv = $("#serv");
+ 			var $enter = $("#enter");
+ 			var $file = $("#file");
+ 			var socket = io.connect();
+ 			var h = document.body.scrollHeight;
+
+ 			
+
+ 			$enter.submit(function(e) {
+ 				e.preventDefault();
+ 				$serv.html('<font color="#555" size="2">Loading...</font>');
+ 				socket.emit('trigger', $file[0].value);
+ 			});
+
+ 			socket.on('send data', function(data) {
+
+ 				if(data.msg != '') {
+ 					$serv.append('<br>');
+ 					if(data.msg.includes("ERROR")) {
+	 					$serv.append('<font color="red">' + data.msg + '</font>');
+	 				}
+	 				else {
+	 					$serv.append(data.msg);
+	 				}
+	 				window.scrollTo(0, document.body.scrollHeight);					
+ 				}
+
+ 				if(data.next == 'y'){
+ 					printFurther(data.length);
+ 				}
+ 			}); 
+
+ 			function printFurther(file_length) {
+ 				socket.emit('height', file_length);
+ 			}
+
+ 		});
+ 	</script>
+</body>
+</html>
