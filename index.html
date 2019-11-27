@@ -7,58 +7,136 @@
 	<link rel="icon" href="icon.png" type="image/x-icon"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+	<style>
+		#header-bar {
+			position: fixed;
+			top: 0;
+			right: 0;
+			left: 0;
+			padding: 10px;
+			background-color: white;
+			border-bottom: 5px solid #555;
+			z-index: 100;
+		}
+
+		#header-title {
+			display: inline-block;
+			font-size: 22px;
+			font-family: arial;
+			margin: 5px;
+		}
+
+		#header-icon {
+			display: inline-block;
+		}
+
+		#header-checkbox {
+			font-size: 12px;
+			width: 100%;
+			text-align: center;
+			padding: 10px;
+		}
+
+		#header-search {
+			display: inline-block;
+			float: right;
+		}
+
+		#log-container {
+			position: absolute;
+			top: 80px;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			background-color: #ccc;
+			font-family: monospace;
+			padding: 30px;
+			margin-bottom: 25px;
+			overflow: auto;
+		}
+
+		.show-error-only .info-msg {
+			display: none;
+		}
+	</style>
 </head>
 <body>
-	<div style="width: 100%">
- 		<div style="position: fixed; border-bottom:5px solid #555; margin-top: 20px; background-color: white; width: 96%; padding: 20px;">
-	 		<img src="icon.png" width="70px">
-	 		<span align="center">Real-Time Log Viewer</span>
-		 	<form id="enter" style="float: right;">
-		 		<input type="text" id="file" placeholder="Enter file name">
-		 		<input type="image" id="submit" src="reload.png" width="30px">
-		 	</form>
+	<div id="header-bar">
+		
+		<div id="header-icon">
+			<img src="icon.png" width="50px">	
+		</div>
+		
+		<div id="header-title">
+ 			Real-Time Log Viewer
  		</div>
-
-	 	<div id="serv" style="font-family: monospace; background-color: #ccc; padding: 10px;" >
+ 		
+ 		<div id="header-search">
+	 		<form id="enter">
+	 			<input type="text" id="file" placeholder="Enter file name">
+	 			<input type="image" id="submit" src="reload.png" width="30px">
+	 		</form>
+	 		<div id="header-checkbox">
+ 				<input type="checkbox" id="error-checkbox">Error Only</input>
+ 			</div>
 	 	</div>
-	 </div>
 
+	</div>
+
+ 	<div id="log-container"></div>
  	<script>
+ 		$(document).ready(function(){
+ 			$("#error-checkbox").prop("checked", false);
+
+  				$("#error-checkbox").change(function(){
+    				if (this.checked) {
+    					$("#log-container").addClass("show-error-only");
+    				} else {
+    					$("#log-container").removeClass("show-error-only");
+    				}
+  			});
+		});
+
  		$(function() {
- 			var $serv = $("#serv");
+ 			var $serv = $("#log-container");
  			var $enter = $("#enter");
  			var $file = $("#file");
+
+ 			//Creates the connection
  			var socket = io.connect();
- 			var h = document.body.scrollHeight;
 
- 			
-
+ 			//Triggers on clicking the submit button
  			$enter.submit(function(e) {
  				e.preventDefault();
  				$serv.html('<font color="#555" size="2">Loading...</font>');
  				socket.emit('trigger', $file[0].value);
  			});
 
+ 			//Reeives each line after the trigger
  			socket.on('send data', function(data) {
 
  				if(data.msg != '') {
- 					$serv.append('<br>');
  					if(data.msg.includes("ERROR")) {
-	 					$serv.append('<font color="red">' + data.msg + '</font>');
+	 					$serv.append('<font color="red" class="error-msg"><br>' + data.msg + '</font>');
+	 				} else if(data.msg.includes("WARN")) {
+	 					$serv.append('<font color="#b37400" class="info-msg"><br>' + data.msg + '</font>');
+	 				} else {
+	 					$serv.append('<font color="#001d43" class="info-msg"><br>' + data.msg + '</font color="green">');
 	 				}
-	 				else {
-	 					$serv.append(data.msg);
-	 				}
-	 				window.scrollTo(0, document.body.scrollHeight);					
+
+	 				//auto scroll to the last line 
+	 				$serv.scrollTop($serv[0].scrollHeight);				
  				}
 
+
  				if(data.next == 'y'){
+ 					//Gets more new lines to print after the trigger
  					printFurther(data.length);
  				}
  			}); 
 
  			function printFurther(file_length) {
- 				socket.emit('height', file_length);
+ 				socket.emit('height', {file_length: file_length, file_name: $file[0].value});
  			}
 
  		});
