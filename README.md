@@ -17,4 +17,4 @@ Open the browser and go to `http://127.0.0.1:3000/` or `localhost:3000` to view 
 
 ## Screenshot
 
-![image](assets/screenshot.png)
+![image](screenshots/screenshot.png)
