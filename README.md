@@ -15,5 +15,5 @@ Log viewer `log_viewer.js` creates the server which will run on the port 3000 an
 Run `node log_viewer.js` to create the server on the posrt 3000.
 Open the browser and go to `http://127.0.0.1:3000/` or `localhost:3000` to view the real-time logger.
 
+##Screenshot
 ![image](assets/screenshot.png)
-This is a screenshot of the application
